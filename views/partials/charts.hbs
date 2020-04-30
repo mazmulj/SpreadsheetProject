@@ -1,0 +1,89 @@
+<script src="Chart.bundle.min.js"></script>
+<style>
+    #chartArea{
+        width: 800px;
+        height: 400px;
+    }
+</style>
+
+<h1 class="text-center pt-2">Create Charts from the spreadsheets</h1>
+
+<div id="sheetType"></div>
+<div id="chartArea">
+    <canvas id="lineArea"></canvas>
+    <canvas id="pieArea"></canvas>
+</div>
+
+<script>
+    const requestParams = {
+         mode: 'cors',
+         credentials: 'same-origin',
+         headers : {
+             'Accept' : 'application/json',
+             'Content-Type' : 'application/json',
+         },
+    };
+
+    const sType = document.getElementById('sheetType');
+
+    async function loadSheetChoice() {
+    const container = sType;
+    console.log('hits');
+    const params = {...requestParams, method: 'GET' };
+    const resp = await fetch( '/sheet-list', params );
+    const json = await resp.json();
+    container.innerHTML = '';
+    container.append( ...json.map( (x) => {
+        const button = document.createElement('button');
+        button.textContent = x;
+        return button;
+    } ));
+    console.log( json );
+    }
+    loadSheetChoice();
+
+    let ctx = document.getElementById('lineArea').getContext('2d');
+    let scatterChart = new Chart(ctx, {
+    type: 'scatter',
+    data: { datasets: [] },
+    options: {}
+    });
+
+    sType.addEventListener('click', async (evt) => {
+    const { target } = evt;
+    if ( target.nodeName !== 'BUTTON' ) return;
+    const name = target.textContent;
+    const params = {...requestParams, method: 'GET' };
+    const resp = await fetch( `/sheet/${name}`, params );
+    const values = await resp.json();
+    console.log(values);
+    const datasetNames = delete values[0];
+    const indexName = delete datasetNames[0];
+    
+    const colours = ['black','red','blue','yellow','pink',];
+    let colourIndex = 0;
+
+    const datasets = [];
+    for( let i = 0; i < datasetNames.length; i++ ) {
+        const pairs = [];
+        for(let j=0; j<values[i].length;j++){
+            pairs.push({ x: values[row][0], y:values[row][i+1] });
+        }
+            const dataset = {
+                label: datasetNames[i],
+                data: pairs,
+                pointBackgroundColor : colours[colourIndex],
+                borderColor : colours[colourIndex],
+                showLine : true,
+                fill: false,
+                lineTension : 0,
+            }
+        datasets.push( dataset );
+        colourIndex = colourIndex >= colours.length ? 0 : colourIndex+1;
+    }
+    scatterChart.data.datasets = datasets;
+    scatterChart.update();
+    });
+
+
+</script>
