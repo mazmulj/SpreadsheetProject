@@ -1,0 +1,296 @@
+<style>
+    .back{
+        background-color: rgba(219, 219, 219, 0.185);
+    }
+    .container input{
+        margin-top: 30px;
+    }
+    #sheetName, #sub{
+        width: 98%;
+    }
+
+    #save, #load, #row, #col{
+        width: 49%;
+    }
+
+    .container1{
+        margin-top: 50px;
+        margin-left: 100px;
+    }
+
+    #csvExport {
+        border: thin solid black;
+        margin-top: 20px;
+        width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 10px;
+    }
+
+    .container2{
+        display: flex;
+        width: 80%;
+        margin-top: 50px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 75%;
+        max-height: 75%;
+    }
+
+    .checkBox{
+        margin-top: 20px;
+        margin-left: 170px;
+    }
+
+    .container2 input{
+        margin-top: 15px;
+        margin-left: 60px;
+        margin-bottom: 15px;
+    }    
+
+    .exportPart {
+        flex: 0 1 50%;
+        min-height: 100%;
+        max-width: 50%;
+        padding: .5em;
+        padding: .5em;
+    }
+
+    .importPart {
+        flex: 0 1 50%;
+        min-height: 100%;
+        max-width: 50%;
+        padding: .5em;
+    }
+
+    .row input {
+        flex-grow: 1;
+        flex-shrink: 1;
+        margin:5px; 
+        border: red solid 0.5px;
+        font-family: monospace;
+        font-size: 12pt;
+        padding : 4px;
+        text-align: center;
+        width: 1ch;
+    }
+
+    #spread-sheet{
+        width: 80%; 
+        padding: 10px; 
+        margin-top: 30px; 
+        margin-right : auto;
+        margin-left : auto; 
+        border: thin black solid;
+    }
+
+    .sheet-list button{
+        margin-left: 20px;
+        margin-bottom: 10px;
+        font-size: 12px;
+    }
+
+</style>
+
+<div class="back">
+<h1 class="ml-5 mb-3 pt-2">Your spreadsheets</h1>
+<p style="margin-left: 25px;">Click on a name to load that spreadsheet!</p>
+<div class="sheet-list">
+    <ul id="list"></ul>    
+</div>
+
+<h1 class="text-center pt-2">Create your own spreadsheet</h1>
+<div class="container">
+    <input id="sheetName" type="text" placeholder="Name">
+    <input id="row" type="number" placeholder="Number of rows">
+    <input id="col" type="number" placeholder="Number of columns" size="5">
+    <input id="sub" type="submit" placeholder="submit">
+    <input id="save" type="button" value="Save">
+    <input id="load" type="button" value="Load">
+</div>
+
+<div class="checkBox">
+    <label class="checkbox-inline">Select to make your spreadsheet public.  
+        <input type="checkbox" id="shareable" value="">
+    </label>
+</div>
+
+<div id="spread-sheet">Your spreadsheet will appear here!</div>
+
+<div class="container2">
+    <div class="exportPart">
+        <h1 class="text-center pt-2">Export Spreadsheet</h1>
+        <input id="export" type="button" value="Export Spreadsheet">
+        <pre id="csvExport">The exported CSV will appear here!</pre>
+    </div>
+</div>
+</div>
+
+<script>
+    const requestParams = {
+         mode: 'cors',
+         credentials: 'same-origin',
+         headers : {
+             'Accept' : 'application/json',
+             'Content-Type' : 'application/json',
+         },
+    };
+    
+    const submit = document.getElementById('sub');
+    submit.addEventListener('click', function (evt){
+        const spreadSheet = document.getElementById('spread-sheet');
+        const r = document.getElementById('row').value;
+        const c = document.getElementById('col').value;
+        const sheet = makeSpreadSheet(c,r);
+        spreadSheet.innerHTML = '';
+        spreadSheet.append(sheet);
+    });
+
+    function makeSpreadSheet( n, m ) {
+        const sheet = document.createElement('div');
+        sheet.setAttribute('class', 'sheet');
+        for( let j = 0 ; j < m ; j++ ) {
+            const row = document.createElement('div');
+            row.setAttribute('class', 'row');
+            for( let i = 0; i < n; i++ ) {
+                const inp = document.createElement('input');
+                row.append( inp );
+            }
+            sheet.append( row );
+        }
+        return sheet;
+    };
+
+    function getSheetInputs( element ) {
+        const sheetRow = Array.from(element.querySelectorAll('div.row'));
+        const sheet = sheetRow.map( (r) => {
+            return Array.from(r.querySelectorAll('input'));
+        });
+        return sheet;
+    };
+
+    function getValues( sheetInputs ) {
+        return sheetInputs.map( (r) => r.map( (c) => c.value ));
+    };
+
+    const spreadSheet = document.getElementById('spread-sheet');
+    const sheetName = document.getElementById('sheetName');
+    const save = document.getElementById('save');
+
+    save.addEventListener('click', async (evt) => {
+        const row1 = document.getElementById('row').value;
+        const col1 = document.getElementById('col').value;
+        const name = sheetName.value;
+        if ( name.trim().length === 0 ) return; // ignore if no name
+        const inputs = getSheetInputs( spreadSheet );
+        console.log(inputs);
+        const values = JSON.stringify( { "values": getValues(inputs), "status": statusToggler.checked } );
+        const params = {...requestParams, method: 'PUT', body: values };
+        const resp = await fetch( `/sheet/${name}`, params );
+        const json = await resp.json();
+        console.log( 'save', json );
+        if ( json.ok ) {
+            loadNames( listArea );
+            console.log('added');
+        }
+        else{console.log('not')};
+    });
+
+    const exportB = document.getElementById('export');
+    const csvDisplay = document.getElementById('csvExport');
+    exportB.addEventListener('click', async(evt) => {
+        const name = sheetName.value;
+        const inputs = getSheetInputs( spreadSheet );
+        const values = JSON.stringify( getValues( inputs ) );
+        const params = {...requestParams, method: 'PUT', body: values };
+        const resp = await fetch( '/csv-export', params );
+        // read the text
+        const text = await resp.text();
+        console.log( text );
+        csvDisplay.textContent = text;
+    });
+
+    const loadButton = document.querySelector('#load');
+    const row1 = document.getElementById('row').value;
+    const col1 = document.getElementById('col').value;
+    const makeSheet = makeSpreadSheet(col1, row1);
+    const statusToggler = document.getElementById('shareable');
+    const listArea = document.querySelector('#list');
+
+    async function loadNames(container) {
+            const params = { ...requestParams, method: 'GET' };
+            const resp = await fetch('/sheet-list', params);
+            const json = await resp.json();
+            container.innerHTML = '';
+            container.append(...json.map((x) => {
+                const li = document.createElement('li');
+                const span = document.createElement('span');
+                span.textContent = x.name;
+                li.append(span);
+                li.append(' ');
+                const button = document.createElement('button');
+                button.textContent = 'DELETE';
+                li.append(button);
+                return li;
+            }));
+            console.log(json);
+        }
+        loadNames(listArea);
+
+    // clicking on a list item load the spread sheet
+
+        listArea.addEventListener('click', async (evt) => {
+            const { target } = evt;
+            if (target.nodeName === 'SPAN') {
+                const name = target.textContent;
+                sheetName.value = name;
+                const params = { ...requestParams, method: 'GET' };
+                const resp = await fetch(`/sheet/${name}`, params);
+                const json = await resp.json();
+                console.log(json);
+                const sheet = rebuildSpreadSheet(json);
+                spreadSheet.innerHTML = '';
+                spreadSheet.append(sheet);
+            }
+            else if (target.nodeName === 'BUTTON') {
+                const name = target.parentNode.querySelector('span').textContent;
+                const params = { ...requestParams, method: 'DELETE' };
+                const resp = await fetch(`/sheet/${name}`, params);
+                const json = await resp.json();
+                console.log(json);
+                if (json.ok) {
+                    // refresh the names
+                    await loadNames(listArea);
+                }
+            }
+        });
+    
+    function rebuildSpreadSheet(payload) {
+            const sheet = document.createElement('div');
+            sheet.setAttribute('class', 'sheet');
+            for (let index = 0; index < payload.length; index++) {
+                const row = document.createElement('div');
+                row.setAttribute('class', 'row');
+                for (let jendex = 0; jendex < payload[index].length; jendex++) {
+                    const inp = document.createElement('input');
+                    inp.value = payload[index][jendex];
+                    row.append(inp);
+                }
+                sheet.append(row);
+            }
+            return sheet;
+
+        }
+
+    loadButton.addEventListener('click', async (evt) => {
+            let sheetNameLoad = sheetName.value;
+            const params = { ...requestParams, method: 'GET' };
+            const resp = await fetch(`/sheet/${sheetNameLoad}`, params);
+            const json = await resp.json();
+            console.log(json);
+            const sheet = rebuildSpreadSheet(json);
+            spreadSheet.innerHTML = '';
+            spreadSheet.append(sheet);
+    });
+
+</script>
