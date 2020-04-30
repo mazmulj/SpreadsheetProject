@@ -1,0 +1,78 @@
+<h1 class="text-center">Manage Users</h1>
+
+<div id="users" class="container">
+    <table id="UsersTable" class="table">
+    <thead>
+        <tr>
+        <th scope="col">Email</th>
+        <th scope="col">Password</th>
+        <th scope="col">First Name</th>
+        <th scope="col">Last Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each users}}
+
+        <tr id="{{email}}" class="each">
+                <td>{{email}}</td>
+                <td contenteditable="true" style="cursor: pointer;">{{passwd}}</td>
+                <td contenteditable="true" style="cursor: pointer;">{{firstName}}</td>
+                <td contenteditable="true" style="cursor: pointer;">{{lastName}}</td>
+                <td><input type="button" value="update" class="updateUser btn btn-success"></td>
+                <td><input type="button" value="delete" class="deleteUser btn btn-warning"></td>
+        </tr>
+   {{/each}}
+    </tbody>         
+    </table>
+</div>
+
+<script>
+
+    // custom element for user form
+(function() {
+    function AdminChanges (button) {
+        for (let i = 0; i < button.length; i++) {
+            button[i].addEventListener('click', function (evt) {
+                let aVal = evt.target.value;
+                let email = deleteB[i].parentNode.parentNode.id;
+                let passwd = button[i].parentNode.parentNode.childNodes[3].innerText;
+                let firstname = button[i].parentNode.parentNode.childNodes[5].innerText;
+                let lastname = button[i].parentNode.parentNode.childNodes[7].innerText;
+
+                let req = new XMLHttpRequest();
+                req.responseType = 'json';
+                if (aVal === 'update') {
+                    let obj = {email : email, passwd : passwd, firstname : firstname, lastname : lastname};
+                    req.open('PUT', `/update-user`);
+                    req.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+                    req.onload = function (evt) {
+                        if (req.status == 200) { // check for ok response
+                            const resp = req.response;
+                            console.log(resp);
+                        }
+                    };
+                    req.send(JSON.stringify(obj))
+                }
+                else {
+                    req.open('DELETE', `/user/${email}`);
+                    req.onload = function (evt) {
+                        if (req.status == 200) { // check for ok response
+                            const resp = req.response;
+                            console.log(resp);
+                            let parent = deleteB[i].parentNode.parentNode.parentNode;
+                            parent.removeChild(deleteB[i].parentNode.parentNode)
+                        }
+                    };
+                    req.send()
+                }
+
+            })
+        }
+    }
+    let deleteB = document.querySelectorAll(".deleteUser");
+    AdminChanges(deleteB);
+
+    let updateB = document.querySelectorAll(".updateUser");
+    AdminChanges(updateB);
+}());
+</script>
