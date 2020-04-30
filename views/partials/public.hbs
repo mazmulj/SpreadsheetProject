@@ -1,0 +1,62 @@
+<style>
+    h3{
+        margin-top: 20px;
+        margin-left: 50px;
+    }
+    .container{
+        margin-top: 20px;
+        margin-left: 50px;
+    }
+    #copy{
+        background-color: rgba(0, 0, 0, 0.596); /* Green */
+        border: none;
+        color: white;
+        padding: 10px 12px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+
+</style>
+
+<h1 class="text-center pt-4">Public Spreadsheets</h1>
+
+<h3>These are the available public Spreadsheets.</h3>
+<div class="container">
+<ul id="list" style="list-style-type: circle;">
+    {{#each names}}
+    <div id="{{@index}}">
+        <li contenteditable="true" id="{{@index}}">{{this}}</li>
+        <input type="button" value="Duplicate" id="copy" />
+    </div>
+    {{/each}}
+</ul>
+</div>
+
+<script>
+    const requestParams = {
+        mode: 'cors',
+        credentials: 'same-origin',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+    };
+    let listArea = document.getElementById("list");
+    listArea.addEventListener('click', async (evt) => {
+        let aVal = evt.target.value;
+        console.log(aVal);
+        if (aVal === 'copy') {
+            const name = evt.target.parentNode.querySelector('li').textContent;
+            console.log(name);
+            const params = { ...requestParams, method: 'PUT' };
+            const resp = await fetch(`/sheet/${name}`, params);
+            const json = await resp.json();
+            alert('Spreadsheet copied!');
+            console.log(json)
+        }
+    });
+</script>
