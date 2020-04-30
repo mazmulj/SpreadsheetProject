@@ -1,0 +1,33 @@
+{
+  "name": "comp3100",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "bootstrap": "^4.4.1",
+    "chart.js": "^2.9.3",
+    "connect-flash": "^0.1.1",
+    "cookie-parser": "~1.4.4",
+    "cookie-session": "^1.4.0",
+    "csv-string": "^3.2.0",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "express-hbs": "^2.3.0",
+    "hbs": "~4.0.4",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.2",
+    "sha-256-js": "^1.0.3",
+    "sqlite3": "^4.1.1",
+    "sweetalert": "^2.1.2"
+  },
+  "devDependencies": {},
+  "description": "## Installation To install node modules in your terminal from the root of the directory: ``` $ npm install ```",
+  "main": "app.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
