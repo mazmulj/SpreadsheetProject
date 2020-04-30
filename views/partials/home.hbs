@@ -1,0 +1,13 @@
+{{#if req.session.login}}
+
+
+<body style="background-color: rgba(0, 0, 0, 0.678);">
+<div class="container p-3" style="background-color: white; margin-top: 200px;">
+  <div class="container">
+    <h1 class="display-4">Create and Share Spreadsheets</h1>
+    <p class="lead">Computer Science 3100 - Final Project</h1>
+    <h2>User Session: {{req.session.firstName}}</h2>
+  </div>
+</div>
+</body>
+{{/if}}
