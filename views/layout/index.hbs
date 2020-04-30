@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" crossorigin="anonymous">
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"
+    crossorigin="anonymous"></script>
+  {{!-- <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script> --}}
+  <title>{{title}}</title>
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-md navbar-light bg-light">
+    <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+      <div class="navbar nav">
+        <a class="nav-item nav-link" href="/">HOME</a>
+        {{#if req.session.login}}
+        <a class="nav-item nav-link" href="/spreadsheets">CREATE</a>
+        <a href="/public" class="nav-item nav-link">PUBLIC SHEETS</a>
+        <a href="/charts" class="nav-item nav-link">CHARTS</a>
+        <a href="/account-details" class="nav-item nav-link">ACCOUNT</a>
+        {{/if}}
+        {{#if req.session.admin}}
+        <a href="/users" class="nav-item nav-link">USERS</a>
+        {{/if}}
+      </div>
+      <div class="navbar nav">
+        {{#if req.session.login}}
+        <form action="/logout" method="POST" style="background-color: #333;">
+          <input class="btn btn-dark" type="submit" value="LOGOUT">
+        </form>
+        {{/if}}
+      </div>
+    </div>
+    </div>
+  </nav>
+  {{{body}}}
+</body>
+
+</html>
